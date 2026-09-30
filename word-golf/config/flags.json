@@ -89,6 +89,15 @@
       "defaultVariation": 0,
       "hypothesis": "Session replay unlocks LD flag Monitoring and session-level debugging; off by default for input privacy.",
       "watchedMetric": null
+    },
+    {
+      "key": "enable-theme-toggle",
+      "name": "Enable Theme Toggle",
+      "kind": "string",
+      "variations": ["control", "v1"],
+      "defaultVariation": 0,
+      "hypothesis": "A light/dark toggle increases accessibility and satisfaction without affecting gameplay.",
+      "watchedMetric": "theme-toggle-used"
     }
   ]
 }

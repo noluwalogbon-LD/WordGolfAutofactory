@@ -125,6 +125,15 @@
       "unit": "count",
       "successCriteria": "LowerThanBaseline",
       "description": "Clipboard write failed when sharing a daily result."
+    },
+    {
+      "key": "theme-toggle-used",
+      "name": "Theme Toggle Used",
+      "category": "business",
+      "kind": "custom",
+      "unit": "count",
+      "successCriteria": "HigherThanBaseline",
+      "description": "Player clicked the theme toggle button (treatment path only). Measures feature adoption."
     }
   ]
 }

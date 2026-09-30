@@ -33,6 +33,10 @@ export const METRIC_EVENTS = {
    *  rendered (treatment path only). Occurrence metric — higher is better
    *  (business). */
   poweredByFooterViewed: "show-powered-by-footer-viewed",
+  // enable-theme-toggle guarded-release events
+  /** Fired each time a user clicks the ThemeToggle button (treatment path only).
+   *  Occurrence metric — higher is better (business); measures feature adoption. */
+  themeToggleUsed: "theme-toggle-used",
 } as const;
 
 export type MetricEvent = (typeof METRIC_EVENTS)[keyof typeof METRIC_EVENTS];

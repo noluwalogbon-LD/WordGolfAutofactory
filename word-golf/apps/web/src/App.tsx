@@ -20,7 +20,7 @@ import {
   type WordGraph,
   PRACTICE_DIFFICULTIES,
 } from "@word-golf/engine";
-import { FLAG_KEYS, METRIC_EVENTS, useFlag, useTrack } from "@word-golf/ld";
+import { FLAG_KEYS, METRIC_EVENTS, useFlag, useFlagVariation, useTrack } from "@word-golf/ld";
 import { graph, practicePools, startPool, targetPool } from "./words.js";
 
 const PRACTICE_DIFFICULTY_LEVELS = PRACTICE_DIFFICULTIES;
@@ -35,6 +35,55 @@ const REJECTION_COPY: Record<MoveRejection, string> = {
 interface Feedback {
   kind: "info" | "error";
   text: string;
+}
+
+type Theme = "dark" | "light";
+
+function readStoredTheme(): Theme {
+  try {
+    return window.localStorage.getItem("word-golf-theme") === "light" ? "light" : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState<Theme>(readStoredTheme);
+  const track = useTrack();
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try {
+      window.localStorage.setItem("word-golf-theme", theme);
+    } catch {
+      // persistence is best-effort — the toggle still works for this session
+    }
+  }, [theme]);
+
+  const next: Theme = theme === "dark" ? "light" : "dark";
+
+  function handleToggle() {
+    setTheme(next);
+    // Business metric: fire on each toggle click (treatment path only).
+    // Wrapped in try/catch so a tracking failure can never break the button.
+    try {
+      track(METRIC_EVENTS.themeToggleUsed);
+    } catch {
+      // intentionally swallowed — telemetry must not affect UI
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      aria-label={`Switch to ${next} mode`}
+      aria-pressed={theme === "light"}
+      onClick={handleToggle}
+    >
+      {theme === "dark" ? "Light mode" : "Dark mode"}
+    </button>
+  );
 }
 
 export function App() {
@@ -56,6 +105,11 @@ export function App() {
   // "medium" avoids crashing puzzle generation on the control path.
   const wordPoolDifficulty = normalizePracticeDifficulty(wordPoolDifficultyRaw);
   const showPoweredByFooter = useFlag(FLAG_KEYS.showPoweredByFooter);
+  // enable-theme-toggle: string multivariate ("control" | "v1").
+  // Control path: "control" → ThemeToggle not rendered; dark-only (existing behavior).
+  // Treatment path: "v1"    → ThemeToggle rendered; users can switch light/dark.
+  const enableThemeToggleVariation = useFlagVariation(FLAG_KEYS.enableThemeToggle);
+  const showThemeToggle = enableThemeToggleVariation === "v1";
 
   // Business metric: fire once when the footer is rendered (treatment path).
   // Wrapped in try/catch so a tracking failure can never break the page.
@@ -307,7 +361,10 @@ export function App() {
   return (
     <main className="app">
       <header className="header">
-        <h1>Word Golf</h1>
+        {showThemeToggle && <ThemeToggle />}
+        <div className="header-top">
+          <h1>Word Golf</h1>
+        </div>
         <p className="tagline">
           Turn the starting word into the target word, one letter at a time.
           Every step must be a real word — anything else reverts to the last
