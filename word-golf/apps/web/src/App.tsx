@@ -20,7 +20,7 @@ import {
   type WordGraph,
   PRACTICE_DIFFICULTIES,
 } from "@word-golf/engine";
-import { FLAG_KEYS, METRIC_EVENTS, useFlag, useTrack } from "@word-golf/ld";
+import { FLAG_KEYS, METRIC_EVENTS, useFlag, useFlagVariation, useTrack } from "@word-golf/ld";
 import { graph, practicePools, startPool, targetPool } from "./words.js";
 
 const PRACTICE_DIFFICULTY_LEVELS = PRACTICE_DIFFICULTIES;
@@ -49,6 +49,7 @@ function readStoredTheme(): Theme {
 
 function ThemeToggle() {
   const [theme, setTheme] = useState<Theme>(readStoredTheme);
+  const track = useTrack();
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -60,13 +61,25 @@ function ThemeToggle() {
   }, [theme]);
 
   const next: Theme = theme === "dark" ? "light" : "dark";
+
+  function handleToggle() {
+    setTheme(next);
+    // Business metric: fire on each toggle click (treatment path only).
+    // Wrapped in try/catch so a tracking failure can never break the button.
+    try {
+      track(METRIC_EVENTS.themeToggleUsed);
+    } catch {
+      // intentionally swallowed — telemetry must not affect UI
+    }
+  }
+
   return (
     <button
       type="button"
       className="theme-toggle"
       aria-label={`Switch to ${next} mode`}
       aria-pressed={theme === "light"}
-      onClick={() => setTheme(next)}
+      onClick={handleToggle}
     >
       {theme === "dark" ? "Light mode" : "Dark mode"}
     </button>
@@ -92,6 +105,11 @@ export function App() {
   // "medium" avoids crashing puzzle generation on the control path.
   const wordPoolDifficulty = normalizePracticeDifficulty(wordPoolDifficultyRaw);
   const showPoweredByFooter = useFlag(FLAG_KEYS.showPoweredByFooter);
+  // enable-theme-toggle: string multivariate ("control" | "v1").
+  // Control path: "control" → ThemeToggle not rendered; dark-only (existing behavior).
+  // Treatment path: "v1"    → ThemeToggle rendered; users can switch light/dark.
+  const enableThemeToggleVariation = useFlagVariation(FLAG_KEYS.enableThemeToggle);
+  const showThemeToggle = enableThemeToggleVariation === "v1";
 
   // Business metric: fire once when the footer is rendered (treatment path).
   // Wrapped in try/catch so a tracking failure can never break the page.
@@ -343,7 +361,7 @@ export function App() {
   return (
     <main className="app">
       <header className="header">
-        <ThemeToggle />
+        {showThemeToggle && <ThemeToggle />}
         <div className="header-top">
           <h1>Word Golf</h1>
         </div>

@@ -15,6 +15,7 @@ export const FLAG_KEYS = {
   enableDifficultyPickerUx: "enable-difficulty-picker-ux",
   showPoweredByFooter: "show-powered-by-footer",
   enableSessionReplay: "enable-session-replay",
+  enableThemeToggle: "enable-theme-toggle",
 } as const;
 
 export type ParAlgorithm = "shortest" | "no-reuse" | "heuristic";
@@ -31,6 +32,9 @@ export interface Flags {
   "enable-difficulty-picker-ux": boolean;
   "show-powered-by-footer": boolean;
   "enable-session-replay": boolean;
+  // String multivariate: "control" → ThemeToggle not rendered (dark-only, existing behavior).
+  //                      "v1"      → ThemeToggle rendered; users can switch light/dark.
+  "enable-theme-toggle": string;
 }
 
 /**
@@ -56,4 +60,7 @@ export const FLAG_DEFAULTS: Flags = {
   // Control path: false → session replay off (privacy default for word-game input).
   // Treatment path: true  → LDRecord.start() records anonymized replays in LD.
   "enable-session-replay": false,
+  // Control path: "control" → ThemeToggle component not rendered; dark mode only (existing behavior).
+  // Treatment path: "v1"    → ThemeToggle button rendered; users can switch between light and dark mode.
+  "enable-theme-toggle": "control",
 };
