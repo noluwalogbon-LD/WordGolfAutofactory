@@ -37,6 +37,42 @@ interface Feedback {
   text: string;
 }
 
+type Theme = "dark" | "light";
+
+function readStoredTheme(): Theme {
+  try {
+    return window.localStorage.getItem("word-golf-theme") === "light" ? "light" : "dark";
+  } catch {
+    return "dark";
+  }
+}
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState<Theme>(readStoredTheme);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    try {
+      window.localStorage.setItem("word-golf-theme", theme);
+    } catch {
+      // persistence is best-effort — the toggle still works for this session
+    }
+  }, [theme]);
+
+  const next: Theme = theme === "dark" ? "light" : "dark";
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      aria-label={`Switch to ${next} mode`}
+      aria-pressed={theme === "light"}
+      onClick={() => setTheme(next)}
+    >
+      {theme === "dark" ? "Light mode" : "Dark mode"}
+    </button>
+  );
+}
+
 export function App() {
   const today = utcDateString();
   const track = useTrack();
@@ -307,7 +343,10 @@ export function App() {
   return (
     <main className="app">
       <header className="header">
-        <h1>Word Golf</h1>
+        <ThemeToggle />
+        <div className="header-top">
+          <h1>Word Golf</h1>
+        </div>
         <p className="tagline">
           Turn the starting word into the target word, one letter at a time.
           Every step must be a real word — anything else reverts to the last
