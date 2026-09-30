@@ -5,7 +5,7 @@
   "targetVariation": "v1",
   "releasePlan": {
     "metricKeys": [
-      "theme-toggle-used"
+      "enable-theme-toggle-business"
     ],
     "randomizationUnit": "user",
     "notes": "String multivariate flag (control/v1). control=ThemeToggle not rendered (dark-only, existing behavior). v1=ThemeToggle rendered, users can switch light/dark. useFlagVariation() helper added to @word-golf/ld hooks to support string multivariate evaluation alongside existing boolean useFlag(). FOUC guard in index.html is benign on control path (users can never set 'light' in localStorage if toggle never renders). CSS variables for both themes are always loaded; flag gates only component render."
